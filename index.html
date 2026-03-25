@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>朱雨剑 | 前端开发</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0d0d0d;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #252525;
+      --text-primary: #e8e8e8;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      --accent: #00d9ff;
+      --accent-dim: rgba(0, 217, 255, 0.15);
+      --border: #333333;
+      --card-bg: #141414;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Terminal Cursor */
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.2em;
+      background: var(--accent);
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Background Effects */
+    .bg-code {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.03;
+      overflow: hidden;
+    }
+
+    .bg-code::before {
+      content: '<html>\n  <body>\n    <div class="app">\n      <header>\n        <nav>\n          <span class="tag">&lt;nav&gt;</span>\n          <a href="#about">关于</a>\n          <a href="#projects">项目</a>\n          <a href="#skills">技能</a>\n          <a href="#contact">联系</a>\n        </nav>\n      </header>\n      <main>\n        <section id="hero">\n          <h1>Hello, World</h1>\n          <p>I'm a Frontend Developer</p>\n        </section>\n      </main>\n    </div>\n  </body>\n</html>';
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      word-break: break-all;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    /* Container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(13, 13, 13, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .logo span {
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a::before {
+      content: '<';
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a::after {
+      content: '>';
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .nav-links a:hover::before,
+    .nav-links a:hover::after {
+      opacity: 1;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-content {
+      max-width: 700px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 8vw, 64px);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .hero h1 .typed {
+      color: var(--text-primary);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(18px, 4vw, 24px);
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .hero-title-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: left;
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 40px;
+      line-height: 1.8;
+    }
+
+    .hero-title-code .keyword {
+      color: #c586c0;
+    }
+
+    .hero-title-code .string {
+      color: #ce9178;
+    }
+
+    .hero-title-code .comment {
+      color: #6a9955;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      background: #00b8d9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Sections */
+    section {
+      padding: 100px 0;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::before {
+      content: '//';
+      color: var(--text-muted);
+    }
+
+    /* About Section */
+    #about {
+      background: var(--bg-secondary);
+    }
+
+    .about-content {
+      display: grid;
+      gap: 24px;
+    }
+
+    .about-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .about-text strong {
+      color: var(--text-primary);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .tag-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      transition: all 0.3s;
+    }
+
+    .tag-item:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Projects Section */
+    .projects-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .project-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .project-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      color: var(--text-muted);
+    }
+
+    .project-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .project-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 3px;
+    }
+
+    /* Skills Section */
+    #skills {
+      background: var(--bg-secondary);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .skill-category {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+
+    .skill-category h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .skill-category h3::before {
+      content: '>';
+      color: var(--accent);
+    }
+
+    .skill-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-item {
+      font-size: 13px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .skill-item.master {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(0, 217, 255, 0.3);
+    }
+
+    /* Contact Section */
+    .contact-content {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .contact-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .contact-links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .contact-link .icon {
+      font-size: 16px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    footer p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    footer .heart {
+      color: #ff4757;
+    }
+
+    /* Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .nav-links {
+        gap: 16px;
+      }
+
+      .hero-title-code {
+        font-size: 11px;
+        padding: 16px;
+      }
+
+      .project-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Background Code Effect -->
+    <div class="bg-code"></div>
+
+    <!-- Header -->
+    <header>
+      <nav>
+        <div class="logo"><span>&lt;</span>dev<span>/</span><span>&gt;</span></div>
+        <div class="nav-links">
+          <a href="#about">关于</a>
+          <a href="#projects">项目</a>
+          <a href="#skills">技能</a>
+          <a href="#contact">联系</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-tag code-font fade-in">// 2022 年毕业 · 3 年经验</div>
+        <h1 class="fade-in delay-1">
+          <span class="typed">{{ typedText }}<span class="cursor"></span></span>
+        </h1>
+        <p class="hero-subtitle fade-in delay-2">前端开发工程师</p>
+        <div class="hero-title-code fade-in delay-3">
+<span class="keyword">const</span> developer = {
+  <span class="keyword">name</span>: <span class="string">"朱雨剑"</span>,
+  <span class="keyword">title</span>: <span class="string">"前端开发工程师"</span>,
+  <span class="keyword">skills</span>: [<span class="string">"Vue"</span>, <span class="string">"Electron"</span>, <span class="string">"TypeScript"</span>],
+  <span class="keyword">email</span>: <span class="string">"porall@foxmail.com"</span>,
+  <span class="keyword">status</span>: <span class="string">"求职中"</span>
+};
+        </div>
+        <div class="hero-cta fade-in delay-4">
+          <a href="#projects" class="btn btn-primary">查看项目</a>
+          <a href="#contact" class="btn btn-secondary">联系我</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+      <div class="container">
+        <h2 class="section-title">关于我</h2>
+        <div class="about-content">
+          <p class="about-text">
+            2022年毕业于<span>深圳大学</span>，物联网工程专业。从事前端开发3年，熟悉<span>Vue生态</span>，对工程化、性能优化有一定经验。追求<span>优雅代码</span>，注重用户体验。
+          </p>
+          <div class="tags">
+            <span class="tag-item" v-for="skill in skills" :key="skill">{{ skill }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+      <div class="container">
+        <h2 class="section-title">项目经验</h2>
+        <div class="projects-grid">
+          <div class="project-card" v-for="(project, index) in projects" :key="index">
+            <div class="project-header">
+              <span class="project-name">{{ project.name }}</span>
+              <span class="project-icon">{{ project.icon }}</span>
+            </div>
+            <p class="project-desc">{{ project.desc }}</p>
+            <div class="project-tags">
+              <span class="project-tag" v-for="tag in project.tags" :key="tag">{{ tag }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills">
+      <div class="container">
+        <h2 class="section-title">技能栈</h2>
+        <div class="skills-grid">
+          <div class="skill-category" v-for="(category, index) in skillCategories" :key="index">
+            <h3>{{ category.name }}</h3>
+            <div class="skill-items">
+              <span 
+                class="skill-item" 
+                v-for="skill in category.items" 
+                :key="skill.name"
+                :class="{ master: skill.master }"
+              >
+                {{ skill.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+      <div class="container">
+        <h2 class="section-title">联系方式</h2>
+        <div class="contact-content">
+          <p class="contact-text">欢迎与我联系，期待合作机会！</p>
+          <div class="contact-links">
+            <a href="mailto:porall@foxmail.com" class="contact-link">
+              <span class="icon">✉</span>
+              <span>porall@foxmail.com</span>
+            </a>
+            <a href="tel:15819206304" class="contact-link">
+              <span class="icon">📱</span>
+              <span>15819206304</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <p><span class="code-font">&lt;/&gt;</span> Built with <span class="heart">♥</span> by 朱雨剑</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const typedText = ref('朱雨剑');
+        
+        const skills = [
+          'Vue', 'Vue Router', 'Pinia', 'Electron', 'TypeScript',
+          '低代码平台', 'Monorepo', 'WebSocket', '性能优化', '前端安全'
+        ];
+
+        const projects = [
+          {
+            name: '低代码可视化搭建平台',
+            desc: '参与企业级低代码平台开发，支持拖拽式页面搭建，动态组件渲染，实现业务组件复用率提升60%。',
+            icon: '⚡',
+            tags: ['Vue3', 'TypeScript', 'Monorepo']
+          },
+          {
+            name: 'Electron 桌面应用',
+            desc: '使用 Electron + Vue 开发桌面端应用，实现跨平台部署，集成 WebSocket 实时通信模块。',
+            icon: '🖥️',
+            tags: ['Electron', 'Vue', 'IPC']
+          },
+          {
+            name: 'Websocket 实时通信系统',
+            desc: '负责前端实时消息模块，支持消息收发、已读未读、离线消息同步，优化后消息延迟<100ms。',
+            icon: '💬',
+            tags: ['WebSocket', 'Vue', 'Netty']
+          }
+        ];
+
+        const skillCategories = [
+          {
+            name: 'Frontend',
+            items: [
+              { name: 'Vue', master: true },
+              { name: 'Vue Router', master: true },
+              { name: 'Pinia', master: true },
+              { name: 'TypeScript', master: true },
+              { name: 'Electron' },
+              { name: 'React' }
+            ]
+          },
+          {
+            name: 'Tools',
+            items: [
+              { name: 'Vite', master: true },
+              { name: 'Webpack' },
+              { name: 'ESLint' },
+              { name: 'Git' }
+            ]
+          },
+          {
+            name: 'Backend',
+            items: [
+              { name: 'SpringBoot' },
+              { name: 'Node.js' },
+              { name: 'MySQL' },
+              { name: 'Redis' }
+            ]
+          }
+        ];
+
+        return {
+          typedText,
+          skills,
+          projects,
+          skillCategories
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
